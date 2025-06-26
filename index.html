@@ -118,7 +118,7 @@
                 if (result.success) {
                     jsonDisplay.textContent = JSON.stringify(result, null, 2);
                     status.className = 'status success';
-                    status.textContent = `✅ Scraped ${result.htmlLength} characters`;
+                    status.textContent = `✅ Parsed ${result.rawHtmlLength} chars - Extracted ${result.parsedContent.content.length} characters of content`;
                 } else {
                     status.className = 'status error';
                     status.textContent = `❌ Error: ${result.error}`;
