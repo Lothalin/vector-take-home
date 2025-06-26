@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardiac Device Data - Example Format</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Cardiac Device Data Format</h1>
+        <p class="description">
+            This shows the expected JSON format for the cardiac device scraper output
+        </p>
+        
+        <div class="json-container">
+            <pre id="json-display"></pre>
+        </div>
+    </div>
+
+    <script>
+        // Example data from the README
+        const exampleData = [
+            {
+                "name": "Reveal LINQ",
+                "url": "https://www.medtronic.com/en-us/healthcare-professionals/products/cardiac-rhythm/EXAMPLE_PRODUCT_PAGE_PLACEHOLDER_URL",
+                "description": "The Reveal LINQ ICM with AccuRhythm AI algorithms is for patients with infrequent symptoms requiring long-term cardiac monitoring.",
+                "type": "Loop",
+                "models": ["LNQ11"]
+            },
+            {
+                "name": "Cobalt XT MRI SureScan",
+                "url": "https://www.medtronic.com/en-us/healthcare-professionals/products/cardiac-rhythm/EXAMPLE_PRODUCT_PAGE_PLACEHOLDER_URL",
+                "description": "Cobalt XT ICDs are used to treat sudden cardiac arrest and abnormal heart rhythms.",
+                "type": "ICD",
+                "models": ["DDPA2D1", "DDPA2D4", "DVPA2D1", "DVPA2D4"]
+            },
+            {
+                "name": "Azure MRI SureScan",
+                "url": "https://www.medtronic.com/en-us/healthcare-professionals/products/cardiac-rhythm/EXAMPLE_PRODUCT_PAGE_PLACEHOLDER_URL",
+                "description": "The Azure™ MRI SureScan™ pacemaker manages atrial fibrillation (AF) in pacemaker patients with tablet-based programming and app-based remote monitoring.",
+                "type": "Pacer",
+                "models": ["W3DR01", "W3SR01", "W2DR01", "W1SR01"]
+            }
+        ];
+
+        // Display the JSON with pretty formatting
+        document.getElementById('json-display').textContent = JSON.stringify(exampleData, null, 2);
+    </script>
+</body>
+</html>
