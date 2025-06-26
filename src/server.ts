@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { WebScraper } from './scraper.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,42 @@ app.get('/', (_, res) => {
 
 app.get('/health', (_, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+app.post('/api/scrape', async (req, res) => {
+  try {
+    const { url } = req.body;
+    
+    if (!url) {
+      return res.status(400).json({
+        success: false,
+        error: 'URL is required. Please provide a URL to scrape.',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    const scraper = new WebScraper();
+    const html = await scraper.fetchPage(url);
+    
+    const result = {
+      success: true,
+      timestamp: new Date().toISOString(),
+      url: url,
+      htmlLength: html.length,
+      pageTitle: html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || 'Not found',
+      containsCardiac: html.toLowerCase().includes('cardiac'),
+      containsDevice: html.toLowerCase().includes('device')
+    };
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Scrape failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 app.listen(PORT, () => {

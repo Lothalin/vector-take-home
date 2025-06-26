@@ -3,15 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cardiac Device Data - Example Format</title>
+    <title>Web Scraper Tool</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Cardiac Device Data Format</h1>
+        <h1>Web Scraper Tool</h1>
         <p class="description">
-            This shows the expected JSON format for the cardiac device scraper output
+            Enter a URL to scrape its content and analyze the HTML structure
         </p>
+        
+        <div class="controls">
+            <div class="url-input-section">
+                <label for="urlSelect">URL to scrape:</label>
+                <div class="url-controls">
+                    <select id="urlSelect" class="url-select">
+                        <option value="">-- Select a known URL --</option>
+                        <option value="https://www.medtronic.com/en-us/healthcare-professionals/products/cardiac-rhythm.html">Medtronic - Cardiac Rhythm</option>
+                        <option value="https://example.com">Example.com</option>
+                        <option value="http://localhost:3000/health">Local Health Check</option>
+                        <option value="http://localhost:3000/healthbad">Local Failure Test</option>
+                    </select>
+                    <input 
+                        type="url" 
+                        id="urlInput" 
+                        placeholder="Enter custom URL here or select from dropdown"
+                        class="url-input"
+                    />
+                </div>
+            </div>
+            <button id="scrapeBtn" class="scrape-btn" disabled>🔄 Enter URL to Test</button>
+            <div id="status" class="status"></div>
+        </div>
         
         <div class="json-container">
             <pre id="json-display"></pre>
@@ -19,33 +42,100 @@
     </div>
 
     <script>
-        // Example data from the README
-        const exampleData = [
-            {
-                "name": "Reveal LINQ",
-                "url": "https://www.medtronic.com/en-us/healthcare-professionals/products/cardiac-rhythm/EXAMPLE_PRODUCT_PAGE_PLACEHOLDER_URL",
-                "description": "The Reveal LINQ ICM with AccuRhythm AI algorithms is for patients with infrequent symptoms requiring long-term cardiac monitoring.",
-                "type": "Loop",
-                "models": ["LNQ11"]
-            },
-            {
-                "name": "Cobalt XT MRI SureScan",
-                "url": "https://www.medtronic.com/en-us/healthcare-professionals/products/cardiac-rhythm/EXAMPLE_PRODUCT_PAGE_PLACEHOLDER_URL",
-                "description": "Cobalt XT ICDs are used to treat sudden cardiac arrest and abnormal heart rhythms.",
-                "type": "ICD",
-                "models": ["DDPA2D1", "DDPA2D4", "DVPA2D1", "DVPA2D4"]
-            },
-            {
-                "name": "Azure MRI SureScan",
-                "url": "https://www.medtronic.com/en-us/healthcare-professionals/products/cardiac-rhythm/EXAMPLE_PRODUCT_PAGE_PLACEHOLDER_URL",
-                "description": "The Azure™ MRI SureScan™ pacemaker manages atrial fibrillation (AF) in pacemaker patients with tablet-based programming and app-based remote monitoring.",
-                "type": "Pacer",
-                "models": ["W3DR01", "W3SR01", "W2DR01", "W1SR01"]
-            }
-        ];
+        // Initialize with empty display
+        document.getElementById('json-display').textContent = 'Click "Test Scraper" to see results here...';
 
-        // Display the JSON with pretty formatting
-        document.getElementById('json-display').textContent = JSON.stringify(exampleData, null, 2);
+        // Utility functions
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function updateButtonState() {
+            const urlInput = document.getElementById('urlInput');
+            const scrapeBtn = document.getElementById('scrapeBtn');
+            const url = urlInput.value.trim();
+            const hasValidUrl = url.length > 0 && isValidUrl(url);
+            
+            scrapeBtn.disabled = !hasValidUrl;
+            
+            if (!url) {
+                scrapeBtn.textContent = '🔄 Enter URL to Test';
+            } else if (!hasValidUrl) {
+                scrapeBtn.textContent = '🔄 Enter Valid URL';
+            } else {
+                scrapeBtn.textContent = '🔄 Test Scraper';
+            }
+        }
+
+        // Event handlers
+        function handleDropdownChange() {
+            const urlInput = document.getElementById('urlInput');
+            const selectedValue = this.value;
+            
+            if (selectedValue) {
+                urlInput.value = selectedValue;
+            }
+            updateButtonState();
+        }
+
+        async function handleScrapeClick() {
+            const btn = document.getElementById('scrapeBtn');
+            const status = document.getElementById('status');
+            const jsonDisplay = document.getElementById('json-display');
+            const urlInput = document.getElementById('urlInput');
+            const targetUrl = urlInput.value.trim();
+            
+            if (!isValidUrl(targetUrl)) {
+                status.className = 'status error';
+                status.textContent = '❌ Please enter a valid URL';
+                return;
+            }
+            
+            // Update UI for loading state
+            btn.disabled = true;
+            btn.textContent = '⏳ Scraping...';
+            status.className = 'status loading';
+            
+            try {
+                const hostname = new URL(targetUrl).hostname;
+                status.textContent = `Fetching data from ${hostname}...`;
+
+                const response = await fetch('/api/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: targetUrl })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    jsonDisplay.textContent = JSON.stringify(result, null, 2);
+                    status.className = 'status success';
+                    status.textContent = `✅ Scraped ${result.htmlLength} characters`;
+                } else {
+                    status.className = 'status error';
+                    status.textContent = `❌ Error: ${result.error}`;
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = `❌ Failed to connect: ${error.message}`;
+            } finally {
+                updateButtonState();
+            }
+        }
+
+        // Initialize and attach event listeners
+        updateButtonState();
+        document.getElementById('urlSelect').addEventListener('change', handleDropdownChange);
+        document.getElementById('urlInput').addEventListener('input', updateButtonState);
+        document.getElementById('scrapeBtn').addEventListener('click', handleScrapeClick);
     </script>
 </body>
 </html>
