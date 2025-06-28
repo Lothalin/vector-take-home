@@ -35,19 +35,10 @@ app.post('/api/scrape', async (req, res) => {
     
     const scraper = new WebScraper();
     const parser = new HtmlParser();
-    
     const html = await scraper.fetchPage(url);
-    const parsedContent = parser.parse(html);
+    const parsedContent = await parser.parse(html, url);
     
-    const result = {
-      success: true,
-      timestamp: new Date().toISOString(),
-      url: url,
-      rawHtmlLength: html.length,
-      parsedContent
-    };
-    
-    res.json(result);
+    res.json(parsedContent.devices);
   } catch (error) {
     console.error('Scrape failed:', error);
     res.status(500).json({
@@ -56,6 +47,31 @@ app.post('/api/scrape', async (req, res) => {
       timestamp: new Date().toISOString()
     });
   }
+});
+
+app.get('/static-data', (_, res) => {
+  const staticHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <product>
+        <name>Sample Cardiac Device - Test Product</name>
+        <description>This is a test cardiac device for demonstration purposes.</description>
+        <models>A123, B456, C789</models>
+        <type>Pacemaker</type>
+      </product>
+      <product>
+        <name>Second Cardiac Device - Test Product</name>
+        <description>This is the second test cardiac device for demonstration purposes.</description>
+        <models>A234, B567, C890</models>
+        <type>ICM</type>
+      </product>
+    </head>
+    </html>
+  `;
+  
+  res.setHeader('Content-Type', 'text/html');
+  res.send(staticHtml);
 });
 
 app.listen(PORT, () => {

@@ -20,9 +20,7 @@
                     <select id="urlSelect" class="url-select">
                         <option value="">-- Select a known URL --</option>
                         <option value="https://www.medtronic.com/en-us/healthcare-professionals/products/cardiac-rhythm.html">Medtronic - Cardiac Rhythm</option>
-                        <option value="https://example.com">Example.com</option>
-                        <option value="http://localhost:3000/health">Local Health Check</option>
-                        <option value="http://localhost:3000/healthbad">Local Failure Test</option>
+                        <option value="http://localhost:3000/static-data">Demo: Cardiac Device Page</option>
                     </select>
                     <input 
                         type="url" 
@@ -42,7 +40,6 @@
     </div>
 
     <script>
-        // Initialize with empty display
         document.getElementById('json-display').textContent = 'Click "Test Scraper" to see results here...';
 
         // Utility functions
@@ -96,7 +93,6 @@
                 return;
             }
             
-            // Update UI for loading state
             btn.disabled = true;
             btn.textContent = '⏳ Scraping...';
             status.className = 'status loading';
@@ -115,13 +111,14 @@
 
                 const result = await response.json();
 
-                if (result.success) {
+                if (response.ok && Array.isArray(result)) {
                     jsonDisplay.textContent = JSON.stringify(result, null, 2);
                     status.className = 'status success';
-                    status.textContent = `✅ Parsed ${result.rawHtmlLength} chars - Extracted ${result.parsedContent.content.length} characters of content`;
+                    status.textContent = `✅ Extracted ${result.length} cardiac device(s) from ${hostname}`;
                 } else {
                     status.className = 'status error';
-                    status.textContent = `❌ Error: ${result.error}`;
+                    status.textContent = `❌ Error: ${result.error || 'Unknown error'}`;
+                    jsonDisplay.textContent = JSON.stringify(result, null, 2);
                 }
             } catch (error) {
                 status.className = 'status error';
@@ -131,7 +128,6 @@
             }
         }
 
-        // Initialize and attach event listeners
         updateButtonState();
         document.getElementById('urlSelect').addEventListener('change', handleDropdownChange);
         document.getElementById('urlInput').addEventListener('input', updateButtonState);

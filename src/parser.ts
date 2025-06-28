@@ -1,43 +1,35 @@
 import * as cheerio from 'cheerio';
+import { IProductInformationGrabber } from './interfaces/index.js';
+import { ParsedContent } from './types/index.js';
+import { GenericProductGrabber, MedtronicProductGrabber } from './grabbers/index.js';
 
-/**
- * Structured representation of parsed HTML content
- */
-export interface ParsedContent {
-  content: string;
-}
-
-/**
- * HTML content parser using Cheerio for DOM manipulation
- * Extracts structured data from HTML content
- */
 export class HtmlParser {
-  
-  /**
-   * Parse HTML content into structured data
-   * @param html The HTML content to parse
-   * @param baseUrl The base URL for resolving relative links
-   * @returns Structured parsed content
-   */
-  parse(html: string): ParsedContent {
+  private availableGrabbers: IProductInformationGrabber[];
+
+  constructor(customGrabbers?: IProductInformationGrabber[]) {
+    this.availableGrabbers = customGrabbers || [
+      new MedtronicProductGrabber(),
+      new GenericProductGrabber()
+    ];
+  }
+
+  async parse(html: string, baseUrl: string = ''): Promise<ParsedContent> {
     const $ = cheerio.load(html);
-    const content = this.extractContent($);
+    const productGrabber = this.selectBestGrabber($);
+    const devices = await productGrabber.extractProductInfo($, baseUrl);
     
     return {
-      content
+      devices
     };
   }
 
-  /**
-   * Extract main content from the page
-   * @private
-   */
-  private extractContent($: ReturnType<typeof cheerio.load>): string {
-    $('script, style, nav, header, footer, aside').remove();
-    const mainContent = $('main, article, [role="main"], .content, .main-content').first();
-    if (mainContent.length > 0) {
-      return mainContent.text().trim();
+  private selectBestGrabber($: ReturnType<typeof cheerio.load>): IProductInformationGrabber {
+    for (const grabber of this.availableGrabbers) {
+      if (grabber.canHandle($)) {
+        return grabber;
+      }
     }
-    return $('body').text().trim();
+    
+    return new GenericProductGrabber();
   }
 }

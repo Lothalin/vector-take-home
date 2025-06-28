@@ -1,29 +1,15 @@
 import fetch from 'node-fetch';
 
-/**
- * Configuration options for the WebScraper
- */
 export interface ScraperConfig {
-  /** Request timeout in milliseconds (default: 3000) */
   timeout?: number;
-  /** Number of retry attempts (default: 3) */
   retryAttempts?: number;
 }
 
-/** User agent string to mimic a real browser */
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
-/**
- * A robust web scraper for fetching HTML content from websites
- * Features retry logic, timeout handling, and realistic browser headers
- */
 export class WebScraper {
   private config: Required<ScraperConfig>;
 
-  /**
-   * Create a new WebScraper instance
-   * @param config Configuration options for timeout and retry behavior
-   */
   constructor(config: ScraperConfig = {}) {
     this.config = {
       timeout: config.timeout ?? 3000,
@@ -31,12 +17,6 @@ export class WebScraper {
     };
   }
 
-  /**
-   * Fetch and return the HTML content of a webpage
-   * @param url The URL to scrape (required)
-   * @returns Promise that resolves to the HTML content as a string
-   * @throws Error if the request fails after all retry attempts
-   */
   async fetchPage(url: string): Promise<string> {
     console.log(`Fetching page: ${url}`);
     
@@ -50,13 +30,6 @@ export class WebScraper {
     }
   }
 
-  /**
-   * Fetch a URL with retry logic and timeout handling
-   * @param url The URL to fetch
-   * @param attempt Current attempt number (used for recursive retries)
-   * @returns Promise that resolves to the response text
-   * @private
-   */
   private async fetchWithRetry(url: string, attempt = 1): Promise<string> {
     try {
       const controller = new AbortController();
@@ -96,12 +69,6 @@ export class WebScraper {
     }
   }
 
-  /**
-   * Utility method to create a delay/sleep
-   * @param ms Milliseconds to delay
-   * @returns Promise that resolves after the specified delay
-   * @private
-   */
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
