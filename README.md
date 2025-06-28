@@ -1,7 +1,37 @@
-# vector-take-home
-Cardiac Device Data Scraper
+# Quick Start
+
+### Prerequisites
+- Node.js (version 18 or higher)
+
+### Installation
+- Clone this repository
+- Install dependencies
+  - ```npm install```
+- Build the project
+  - ```npm run build```
+- Run the Application
+  - ```npm run dev```
+- The server will start on http://localhost:3000
+
+### Testing
+- Run all tests
+  - ```npm run test```
+
+</br></br></br>
+# Screenshots
+- Landing page
+![](screenshots/landingPage.png)
+- Static Demo Data
+![](screenshots/staticDemoData.png)
+- Fetching State
+![](screenshots/fetchingState.png)
+- Error State
+![](screenshots/errorState.png)
+- Live Medtronic Data
+![](screenshots/liveMedtronic.png)
 
 
+</br></br></br></br></br></br></br></br></br>
 # Provided readme for consideration
 
 # Data Flow Interview Exercise
